@@ -27,9 +27,20 @@ TARGET = kernel.img
 # Standard-Target
 all: $(BUILD_DIR)/$(TARGET)
 
+# Plattform erkennen
+ifeq ($(OS),Windows_NT)
+    # Windows-spezifische Befehle
+    RM = rmdir /S /Q
+    MKDIR = mkdir
+else
+    # Linux/Unix/Mac-spezifische Befehle
+    RM = rm -rf
+    MKDIR = mkdir -p
+endif
+
 # Build-Verzeichnis erstellen
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+	$(MKDIR) $(OBJ_DIR)
 
 # C-Dateien kompilieren
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
@@ -41,12 +52,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(OBJ_DIR)
 
 # Alles verlinken
 $(BUILD_DIR)/$(TARGET): $(AS_OBJ) $(C_OBJ) | $(OBJ_DIR)
-	mkdir -p $(BUILD_DIR)
+	$(MKDIR) $(BUILD_DIR)
 	$(LD) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel.elf $(AS_OBJ) $(C_OBJ)
 	$(OBJCOPY) $(BUILD_DIR)/kernel.elf -O binary $(BUILD_DIR)/$(TARGET)
 
 # Aufräumen
 clean:
-	rm -rf $(BUILD_DIR)
+	$(RM) $(BUILD_DIR)
 
 .PHONY: all clean
